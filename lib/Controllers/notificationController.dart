@@ -43,6 +43,10 @@ class NotificationController {
         _firebaseMessaging.getToken().then((val) async {
           print('Token: '+val);
           prefs.setString('FCMToken', val);
+          String userID = prefs.get('userId');
+          if(userID != null) {
+            FirebaseController.instanace.updateUserToken(userID, val);
+          }
         });
       }
 

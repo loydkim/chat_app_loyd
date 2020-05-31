@@ -62,9 +62,15 @@ class FirebaseController {
     }
   }
 
+  Future<void> updateUserToken(userID, token) async {
+    await Firestore.instance.collection('users').document(userID).setData({
+      'FCMToken':token,
+    });
+  }
+
   Future<List<DocumentSnapshot>> takeUserInformationFromFBDB() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final QuerySnapshot result = await Firestore.instance.collection('users').where('FCMToken', isEqualTo: prefs.get('FCMToken')).getDocuments();
+    final QuerySnapshot result = await Firestore.instance.collection('users').where('FCMToken', isEqualTo: prefs.get('FCMToken') ?? 'None').getDocuments();
     return result.documents;
   }
 
