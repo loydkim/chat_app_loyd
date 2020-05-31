@@ -1,4 +1,18 @@
 # Chatapploydlab
+<table width="100%" border="0">
+  <tbody>
+    <tr>
+      <td align="center"><strong><h2>iOS Device</h2></strong></td>
+      
+      <td align="center"><strong><h2>Android Device</h2></strong></td>
+	</tr>
+ 	<tr>
+      <td>33</td>
+      <td>44</td>
+    </tr>
+  </tbody>
+</table>
+
 <img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560"> <img src="https://github.com/loydkim/chat_app_loyd/blob/master/adroid_test.gif" width="300" height="560">
 
 ** Please click the Image to know how it works **
