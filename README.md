@@ -2,7 +2,7 @@
 
 | iOS Device  | Android Device |
 | ------------- | ------------- |
-| <img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560">  | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/adroid_test.gif" width="300" height="560">  |
+| <img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560">  | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/android_promotion.gif" width="300" height="560">  |
 
  
 
