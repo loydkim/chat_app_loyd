@@ -1,6 +1,6 @@
 # Chatapploydlab
-
-<img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560"> <img src="https://github.com/loydkim/chat_app_loyd/blob/master/adroid_test.gif" width="300" height="560">
+IOS Device test
+<img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560"></br></br> <img src="https://github.com/loydkim/chat_app_loyd/blob/master/adroid_test.gif" width="300" height="560">
 
 ** Please click the Image to know how it works **
 
