@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    NotificationController.instance;t
+    NotificationController.instance;
     _takeUserInformationFromFBDB();
     super.initState();
   }
