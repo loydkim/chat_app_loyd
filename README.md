@@ -4,12 +4,17 @@
 | ------------- | ------------- |
 | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560">  | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/android_promotion.gif" width="300" height="560">  |
 
- 
 
 ** Please click the Image to know how it works **
 
 [![Youtube](https://img.youtube.com/vi/OnIRKAbOcq4/0.jpg)](https://youtu.be/OnIRKAbOcq4)
 
+* Main features *
+
+- Realtime chatting ( Don't need a refresh)
+- Push Notification ( Background, Foreground)
+- Badge count ( Show unread message count)
+- Send an image ( Crop image and it can expand the image)
 
  The chat function is used in many apps. Flutter allows you to create iPhone and Android apps simultaneously. The main functions are push notification (background, foreground), Badge count, send an image, chat realtime. If you have any problems with my code or have any ideas to update, please leave a comment.
 
