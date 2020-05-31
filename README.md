@@ -1,11 +1,10 @@
 # Chatapploydlab
 
-| First Header  | Second Header |
+| iOS Device  | Android Device |
 | ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
+| <img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560">  | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/adroid_test.gif" width="300" height="560">  |
 
-<img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560"> <img src="https://github.com/loydkim/chat_app_loyd/blob/master/adroid_test.gif" width="300" height="560">
+ 
 
 ** Please click the Image to know how it works **
 
