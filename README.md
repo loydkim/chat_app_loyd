@@ -1,6 +1,6 @@
 # Chatapploydlab
 
-<img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560"> <img src="https://github.com/loydkim/Flutter_login_ui_loyd/blob/master/main2.png" width="300" height="560">
+<img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560"> <img src="https://github.com/loydkim/chat_app_loyd/blob/master/adroid_test.gif" width="300" height="560">
 
 ** Please click the Image to know how it works **
 
