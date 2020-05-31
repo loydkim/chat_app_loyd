@@ -1,5 +1,10 @@
 # Chatapploydlab
 
+** Please click the Image to know how it works **
+
+[![Youtube](https://img.youtube.com/vi/OnIRKAbOcq4/0.jpg)](https://youtu.be/OnIRKAbOcq4)
+
+
  The chat function is used in many apps. Flutter allows you to create iPhone and Android apps simultaneously. The main functions are push notification (background, foreground), Badge count, send an image, chat realtime. If you have any problems with my code or have any ideas to update, please leave a comment.
 
 * Develop environment.
