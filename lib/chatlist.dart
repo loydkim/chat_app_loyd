@@ -19,6 +19,11 @@ class ChatList extends StatefulWidget {
 
 class _ChatListState extends State<ChatList> {
   @override
+  void initState() {
+    FirebaseController.instanace.getUnreadMSGCount();
+    super.initState();
+  }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +33,7 @@ class _ChatListState extends State<ChatList> {
       body: VisibilityDetector(
         key: Key("1"),
         onVisibilityChanged: ((visibility) {
-          print(visibility.visibleFraction);
+          print('ChatList Visibility code is '+'${visibility.visibleFraction}');
           if (visibility.visibleFraction == 1.0) {
             FirebaseController.instanace.getUnreadMSGCount();
           }

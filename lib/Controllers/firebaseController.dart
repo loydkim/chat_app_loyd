@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class FirebaseController {
   static FirebaseController get instanace => FirebaseController();
 
+  // Save Image to Storage
   Future<String> saveUserImageToFirebaseStorage(userId,userName,userIntro,userImageFile) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -18,7 +19,7 @@ class FirebaseController {
       final StorageUploadTask uploadTask = storageReference.putFile(userImageFile);
 
       StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
-      String imageURL = await storageTaskSnapshot.ref.getDownloadURL();
+      String imageURL = await storageTaskSnapshot.ref.getDownloadURL(); // Image URL from firebase's image file
       String result = await saveUserDataToFirebaseDatabase(userId,userName,userIntro,imageURL);
       return result;
     }catch(e) {
@@ -27,6 +28,21 @@ class FirebaseController {
     }
   }
 
+  Future<String> sendImageToUserInChatRoom(croppedFile,chatID) async {
+    try {
+      String imageTimeStamp = DateTime.now().millisecondsSinceEpoch.toString();
+      String filePath = 'chatrooms/$chatID/$imageTimeStamp';
+      final StorageReference storageReference = FirebaseStorage().ref().child(filePath);
+      final StorageUploadTask uploadTask = storageReference.putFile(croppedFile);
+      StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
+      String result = await storageTaskSnapshot.ref.getDownloadURL();
+      return result;
+    }catch(e) {
+      print(e.message);
+    }
+  }
+
+  // About Firebase Database
   Future<String> saveUserDataToFirebaseDatabase(userId,userName,userIntro,downloadUrl) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -74,21 +90,22 @@ class FirebaseController {
     return result.documents;
   }
 
-  Future<void> getUnreadMSGCount() async{
+  Future<int> getUnreadMSGCount([String peerUserID]) async{
     try {
       int unReadMSGCount = 0;
+      String targetID = '';
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String myId = (prefs.get('userId') ?? 'NoId');
 
-      if (myId != 'NoId') {
+      peerUserID == null ? targetID = (prefs.get('userId') ?? 'NoId') : targetID = peerUserID;
+//      if (targetID != 'NoId') {
         final QuerySnapshot chatListResult =
-        await Firestore.instance.collection('users').document(myId).collection('chatlist').getDocuments();
+        await Firestore.instance.collection('users').document(targetID).collection('chatlist').getDocuments();
         final List<DocumentSnapshot> chatListDocuments = chatListResult.documents;
         for(var data in chatListDocuments) {
           final QuerySnapshot unReadMSGDocument = await Firestore.instance.collection('chatroom').
           document(data['chatID']).
           collection(data['chatID']).
-          where('idTo', isEqualTo: myId).
+          where('idTo', isEqualTo: targetID).
           where('isread', isEqualTo: false).
           getDocuments();
 
@@ -96,10 +113,43 @@ class FirebaseController {
           unReadMSGCount = unReadMSGCount + unReadMSGDocuments.length;
         }
         print('unread MSG count is $unReadMSGCount');
+//      }
+      if (peerUserID == null) {
+        FlutterAppBadger.updateBadgeCount(unReadMSGCount);
+        return null;
+      }else {
+        return unReadMSGCount;
       }
-      FlutterAppBadger.updateBadgeCount(unReadMSGCount);
+
     }catch(e) {
       print(e.message);
     }
+  }
+
+  Future updateChatRequestField(String documentID,String lastMessage,chatID,myID,selectedUserID) async{
+    await Firestore.instance
+        .collection('users')
+        .document(documentID)
+        .collection('chatlist')
+        .document(chatID)
+        .setData({'chatID':chatID,
+      'chatWith':documentID == myID ? selectedUserID : myID,
+      'lastChat':lastMessage,
+      'timestamp':DateTime.now().millisecondsSinceEpoch});
+  }
+
+  Future sendMessageToChatRoom(chatID,myID,selectedUserID,content,messageType) async {
+    await Firestore.instance
+        .collection('chatroom')
+        .document(chatID)
+        .collection(chatID)
+        .document(DateTime.now().millisecondsSinceEpoch.toString()).setData({
+      'idFrom': myID,
+      'idTo': selectedUserID,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'content': content,
+      'type':messageType,
+      'isread':false,
+    });
   }
 }

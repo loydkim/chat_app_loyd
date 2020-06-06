@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:chatapploydlab/Model/const.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // For Chatlist Functions
@@ -70,6 +71,11 @@ String returnTimeStamp(int messageTimeStamp) {
   var date = DateTime.fromMillisecondsSinceEpoch(messageTimeStamp);
   resultString = format.format(date);
   return resultString;
+}
+
+void setCurrentChatRoomID(value) async { // To know where I am in chat room. Avoid local notification.
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('currentChatRoom', value);
 }
 
 // For main view Functions

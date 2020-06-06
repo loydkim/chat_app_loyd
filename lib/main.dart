@@ -41,7 +41,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    NotificationController.instance;
+    NotificationController.instance.takeFCMTokenWhenAppLaunch();
+    NotificationController.instance.initLocalNotification();
+    setCurrentChatRoomID('none');
     _takeUserInformationFromFBDB();
     super.initState();
   }
@@ -266,8 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
   _moveToChatList(data) {
     setState(() { _isLoading = false; });
     if(data != null) {
-      Navigator.push(
-          context,
+      Navigator.push(context,
           MaterialPageRoute(
               builder: (context) => ChatList(data, _nameTextController.text)));
     }

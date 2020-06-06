@@ -1,19 +1,21 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'package:chatapploydlab/Model/const.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 import 'firebaseController.dart';
 
 Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
   if (message.containsKey('data')) {
-    // Handle data message
     print('myBackgroundMessageHandler data');
     final dynamic data = message['data'];
   }
 
   if (message.containsKey('notification')) {
-    // Handle notification message
     print('myBackgroundMessageHandler notification');
     final dynamic notification = message['notification'];
   }
@@ -21,17 +23,17 @@ Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
 }
 
 class NotificationController {
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   static NotificationController get instance => NotificationController();
 
-  NotificationController() {
-    _takeFCMTokenWhenAppLaunch();
-    _initLocalNotification();
-  }
+//  NotificationController() {
+//    takeFCMTokenWhenAppLaunch();
+//    initLocalNotification();
+//  }
 
-  Future<void> _takeFCMTokenWhenAppLaunch() async {
+  Future takeFCMTokenWhenAppLaunch() async {
     try{
       if (Platform.isIOS) {
         _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
@@ -91,7 +93,7 @@ class NotificationController {
     }
   }
 
-  _initLocalNotification() async{
+  Future initLocalNotification() async{
     if (Platform.isIOS) {
       // set iOS Local notification.
       var initializationSettingsAndroid =
@@ -131,5 +133,44 @@ class NotificationController {
     await _flutterLocalNotificationsPlugin.show(
         0, name, msg, platformChannelSpecifics,
         payload: 'item x');
+  }
+
+  // Send a notification message
+
+  Future<void> sendNotificationMessageToPeerUser(unReadMSGCount,messageType,textFromTextField,myName,chatID,peerUserToken) async {
+    FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+    await http.post(
+      'https://fcm.googleapis.com/fcm/send',
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'key=$firebaseCloudserverToken',
+      },
+      body: jsonEncode(
+        <String, dynamic>{
+          'notification': <String, dynamic>{
+            'body': messageType == 'text' ? '$textFromTextField' : '(Photo)',
+            'title': '$myName',
+            'badge':'$unReadMSGCount'//'$unReadMSGCount'
+          },
+          'priority': 'high',
+          'data': <String, dynamic>{
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'id': '1',
+            'status': 'done',
+            'chatroomid': chatID,
+          },
+          'to': peerUserToken,
+        },
+      ),
+    );
+
+    final Completer<Map<String, dynamic>> completer =
+    Completer<Map<String, dynamic>>();
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        completer.complete(message);
+      },
+    );
   }
 }
