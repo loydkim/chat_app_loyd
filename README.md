@@ -9,6 +9,44 @@
 
 [![Youtube](https://img.youtube.com/vi/OnIRKAbOcq4/0.jpg)](https://youtu.be/OnIRKAbOcq4)
 
+
+** If you download this code then have this error,
+
+[!] Gradle does not have execution permission. You should change the ownership of the project directory to your user, or move the project to a directory with execute permissions. Gradle task assembleDebug failed with exit code 1 Exited (sigterm)
+
+Do 
+
+chmod a+rx android/gradlew
+
+command in terminal.
+
+** To use it, you have to change your permission in the Database and Storage of the firebase. Because the project didn't consider authentication.
+
+Go to Firebase Console - Database - Rule. Change it this ( )
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write
+    }
+  }
+}
+
+And change the permission in Storage
+
+Go to Firebase Console - Storage - Rules.
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write;
+    }
+  }
+}
+
+
 * Main features *
 
 - Realtime chatting ( Don't need a refresh)
