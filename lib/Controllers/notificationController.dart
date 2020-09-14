@@ -150,7 +150,8 @@ class NotificationController {
           'notification': <String, dynamic>{
             'body': messageType == 'text' ? '$textFromTextField' : '(Photo)',
             'title': '$myName',
-            'badge':'$unReadMSGCount'//'$unReadMSGCount'
+            'badge':'$unReadMSGCount',//'$unReadMSGCount'
+            "sound" : "default"
           },
           'priority': 'high',
           'data': <String, dynamic>{
