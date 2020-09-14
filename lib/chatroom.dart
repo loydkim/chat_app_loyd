@@ -29,13 +29,27 @@ class ChatRoom extends StatefulWidget {
 
 class _ChatRoomState extends State<ChatRoom> {
   final TextEditingController _msgTextController = new TextEditingController();
+  final ScrollController _chatListController = ScrollController();
   String messageType = 'text';
   bool _isLoading = false;
+  int chatListLength = 20;
+  double _scrollPosition = 560;
 
+  _scrollListener() {
+    setState(() {
+      if (_scrollPosition < _chatListController.position.pixels ){
+        _scrollPosition = _scrollPosition + 560;
+        chatListLength = chatListLength + 20;
+      }
+//      _scrollPosition = _chatListController.position.pixels;
+      print('list view position is $_scrollPosition');
+    });
+  }
   @override
   void initState() {
     setCurrentChatRoomID(widget.chatID);
     FirebaseController.instanace.getUnreadMSGCount();
+    _chatListController.addListener(_scrollListener);
     super.initState();
   }
 
@@ -61,12 +75,19 @@ class _ChatRoomState extends State<ChatRoom> {
           }
         }),
         child: StreamBuilder<QuerySnapshot> (
-          stream:Firestore.instance.collection('chatroom').document(widget.chatID).collection(widget.chatID).snapshots(),
+          stream:
+              Firestore.instance.
+              collection('chatroom').
+              document(widget.chatID).
+              collection(widget.chatID).
+              orderBy('timestamp',descending: true).
+              limit(chatListLength).
+              snapshots(),
           builder: (context,snapshot) {
             if (!snapshot.hasData) return LinearProgressIndicator();
             if (snapshot.hasData) {
             for (var data in snapshot.data.documents) {
-              if(data['idTo'] == widget.myID) {
+              if(data['idTo'] == widget.myID && data['isread'] == false) {
                   if (data.reference != null) {
                     Firestore.instance.runTransaction((Transaction myTransaction) async {
                       await myTransaction.update(data.reference, {'isread': true});
@@ -84,7 +105,8 @@ class _ChatRoomState extends State<ChatRoom> {
                           reverse: true,
                           shrinkWrap: true,
                           padding: const EdgeInsets.fromLTRB(4.0,10,4,10),
-                          children: snapshot.data.documents.reversed.map((data) {
+                          controller: _chatListController,
+                          children: snapshot.data.documents.map((data) { //snapshot.data.documents.reversed.map((data) {
                             return data['idFrom'] == widget.selectedUserID ? _listItemOther(context,
                                 widget.selectedUserName,
                                 widget.selectedUserThumbnail,
@@ -216,7 +238,7 @@ class _ChatRoomState extends State<ChatRoom> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Padding(padding: const EdgeInsets.fromLTRB(0,8,0,8),
+              Padding(padding: const EdgeInsets.fromLTRB(0,8,4,8),
                 child: Container(
                   constraints: BoxConstraints(maxWidth: size.width - size.width*0.26),
                   decoration: BoxDecoration(
