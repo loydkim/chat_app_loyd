@@ -36,7 +36,11 @@ class NotificationController {
   Future takeFCMTokenWhenAppLaunch() async {
     try{
       if (Platform.isIOS) {
-        _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
+        _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings(
+          sound: true,
+          badge: true,
+          alert: true
+        ));
       }
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
