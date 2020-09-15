@@ -28,17 +28,13 @@ String readTimestamp(int timestamp) {
       time = 'now';
     }
   } else if (diff.inDays > 0 && diff.inDays < 7) {
-    if (diff.inDays == 1) {
       time = diff.inDays.toString() + 'd ago';
-    }
   } else if (diff.inDays > 6){
-    if (diff.inDays == 7) {
       time = (diff.inDays / 7).floor().toString() + 'w ago';
-    }
   }else if (diff.inDays > 29) {
-    if (diff.inDays == 30) {
       time = (diff.inDays / 30).floor().toString() + 'm ago';
-    }
+  }else if (diff.inDays > 365) {
+    time = '${date.month}-${date.day}-${date.year}';
   }
   return time;
 }
