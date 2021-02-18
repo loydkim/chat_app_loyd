@@ -1,4 +1,4 @@
-<a href="https://www.buymeacoffee.com/loydkim" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 20px !important;width: 100px !important;" ></a>
+<a href="https://www.buymeacoffee.com/loydkim" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 14px !important;width: 80px !important;" ></a>
 
 # Chatapploydlab
 
