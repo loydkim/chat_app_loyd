@@ -10,7 +10,12 @@ class PickImageController {
 
   Future<File> cropImageFromFile() async{
     // TakeImage from user's photo
-    File imageFileFromLibrary = await ImagePicker.pickImage(source:ImageSource.gallery);
+    // File imageFileFromLibrary = await ImagePicker.pickImage(source:ImageSource.gallery);
+
+    final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+    final File imageFileFromLibrary = File(pickedFile.path);
+
+
     // Start crop iamge then take the file.
     File croppedFile = await ImageCropper.cropImage(
         sourcePath: imageFileFromLibrary.path,

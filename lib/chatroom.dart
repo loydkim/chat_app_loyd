@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chatapploydlab/Controllers/notificationController.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
+// import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Controllers/firebaseController.dart';
@@ -66,19 +66,21 @@ class _ChatRoomState extends State<ChatRoom> {
           title: Text('Chat App - Chat Room'),
           centerTitle: true,
         ),
-      body: VisibilityDetector(
-        key: Key("1"),
-        onVisibilityChanged: ((visibility) {
-          print('ChatRoom Visibility code is '+'${visibility.visibleFraction}');
-          if (visibility.visibleFraction == 1.0) {
-            FirebaseController.instanace.getUnreadMSGCount();
-          }
-        }),
-        child: StreamBuilder<QuerySnapshot> (
+      body:
+      // VisibilityDetector(
+      //   key: Key("1"),
+      //   onVisibilityChanged: ((visibility) {
+      //     print('ChatRoom Visibility code is '+'${visibility.visibleFraction}');
+      //     if (visibility.visibleFraction == 1.0) {
+      //       FirebaseController.instanace.getUnreadMSGCount();
+      //     }
+      //   }),
+      //   child:
+        StreamBuilder<QuerySnapshot> (
           stream:
-              Firestore.instance.
+          FirebaseFirestore.instance.
               collection('chatroom').
-              document(widget.chatID).
+              doc(widget.chatID).
               collection(widget.chatID).
               orderBy('timestamp',descending: true).
               limit(chatListLength).
@@ -86,10 +88,10 @@ class _ChatRoomState extends State<ChatRoom> {
           builder: (context,snapshot) {
             if (!snapshot.hasData) return LinearProgressIndicator();
             if (snapshot.hasData) {
-            for (var data in snapshot.data.documents) {
+            for (var data in snapshot.data.docs) {
               if(data['idTo'] == widget.myID && data['isread'] == false) {
                   if (data.reference != null) {
-                    Firestore.instance.runTransaction((Transaction myTransaction) async {
+                    FirebaseFirestore.instance.runTransaction((Transaction myTransaction) async {
                       await myTransaction.update(data.reference, {'isread': true});
                     });
                   }
@@ -106,7 +108,7 @@ class _ChatRoomState extends State<ChatRoom> {
                           shrinkWrap: true,
                           padding: const EdgeInsets.fromLTRB(4.0,10,4,10),
                           controller: _chatListController,
-                          children: snapshot.data.documents.map((data) { //snapshot.data.documents.reversed.map((data) {
+                          children: snapshot.data.docs.map((data) { //snapshot.data.documents.reversed.map((data) {
                             return data['idFrom'] == widget.selectedUserID ? _listItemOther(context,
                                 widget.selectedUserName,
                                 widget.selectedUserThumbnail,
@@ -139,8 +141,8 @@ class _ChatRoomState extends State<ChatRoom> {
             );
           }
         ),
-      )
-    );
+      );
+    // );
   }
 
   Widget _listItemOther(BuildContext context, String name, String thumbnail, String message, String time, String type) {

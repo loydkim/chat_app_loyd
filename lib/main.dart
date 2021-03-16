@@ -2,15 +2,39 @@ import 'dart:io';
 
 import 'package:chatapploydlab/Controllers/notificationController.dart';
 import 'package:chatapploydlab/Controllers/pickImageController.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
+// import 'package:flutter_widgets/flutter_widgets.dart';
 
+import 'package:firebase_core/firebase_core.dart' as firebase_core;
 import 'Controllers/firebaseController.dart';
 import 'Controllers/utils.dart';
 import 'Model/const.dart';
 import 'chatlist.dart';
 
-void main() => runApp(MyApp());
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp();
+  print('Handling a background message ${message.messageId}');
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await firebase_core.Firebase.initializeApp();
+  // Set the background messaging handler early on, as a named top-level function
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  /// Update the iOS foreground notification presentation options to allow
+  /// heads up notifications.
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -70,15 +94,17 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text('Chat App - Add user'),
         centerTitle: true,
       ),
-      body: VisibilityDetector(
-        key: Key("1"),
-        onVisibilityChanged: ((visibility) {
-          print(visibility.visibleFraction);
-          if (visibility.visibleFraction == 1.0) {
-            FirebaseController.instanace.getUnreadMSGCount();
-          }
-        }),
-        child: Stack(
+      body:
+      // VisibilityDetector(
+      //   key: Key("1"),
+      //   onVisibilityChanged: ((visibility) {
+      //     print(visibility.visibleFraction);
+      //     if (visibility.visibleFraction == 1.0) {
+      //       FirebaseController.instanace.getUnreadMSGCount();
+      //     }
+      //   }),
+      //   child:
+        Stack(
           children: <Widget>[
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -187,8 +213,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      ),
-    );
+      );
+    // );
   }
 
   Widget _youtubeTitle() {

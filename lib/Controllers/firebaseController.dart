@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:firebase_core/firebase_core.dart' as firebase_core;
 class FirebaseController {
   static FirebaseController get instanace => FirebaseController();
 
@@ -15,12 +16,27 @@ class FirebaseController {
       await prefs.setString('intro',userIntro);
 
       String filePath = 'userImages/$userId';
-      final StorageReference storageReference = FirebaseStorage().ref().child(filePath);
-      final StorageUploadTask uploadTask = storageReference.putFile(userImageFile);
 
-      StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
-      String imageURL = await storageTaskSnapshot.ref.getDownloadURL(); // Image URL from firebase's image file
+
+      // final StorageReference storageReference = FirebaseStorage().ref().child(filePath);
+      // final StorageUploadTask uploadTask = storageReference.putFile(userImageFile);
+
+      try {
+        await firebase_storage.FirebaseStorage.instance
+            .ref(filePath)
+            .putFile(userImageFile);
+      } on firebase_core.FirebaseException catch (e) {
+        print('upload image exception, code is ${e.code}');
+        // e.g, e.code == 'canceled'
+      }
+
+      // StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
+      // String imageURL = await storageTaskSnapshot.ref.getDownloadURL(); // Image URL from firebase's image file
+      String imageURL = await firebase_storage.FirebaseStorage.instance
+          .ref(filePath)
+          .getDownloadURL();
       String result = await saveUserDataToFirebaseDatabase(userId,userName,userIntro,imageURL);
+
       return result;
     }catch(e) {
       print(e.message);
@@ -32,11 +48,28 @@ class FirebaseController {
     try {
       String imageTimeStamp = DateTime.now().millisecondsSinceEpoch.toString();
       String filePath = 'chatrooms/$chatID/$imageTimeStamp';
-      final StorageReference storageReference = FirebaseStorage().ref().child(filePath);
-      final StorageUploadTask uploadTask = storageReference.putFile(croppedFile);
-      StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
-      String result = await storageTaskSnapshot.ref.getDownloadURL();
-      return result;
+
+      // final StorageReference storageReference = FirebaseStorage().ref().child(filePath);
+      // final StorageUploadTask uploadTask = storageReference.putFile(croppedFile);
+      // StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
+      // String result = await storageTaskSnapshot.ref.getDownloadURL();
+
+      try {
+        await firebase_storage.FirebaseStorage.instance
+            .ref(filePath)
+            .putFile(croppedFile);
+      } on firebase_core.FirebaseException catch (e) {
+        print('upload image exception, code is ${e.code}');
+        // e.g, e.code == 'canceled'
+      }
+
+      // String imageURL = await firebase_storage.FirebaseStorage.instance
+      //     .ref(filePath)
+      //     .getDownloadURL();
+
+      return await firebase_storage.FirebaseStorage.instance
+          .ref(filePath)
+          .getDownloadURL();
     }catch(e) {
       print(e.message);
     }
@@ -46,11 +79,11 @@ class FirebaseController {
   Future<String> saveUserDataToFirebaseDatabase(userId,userName,userIntro,downloadUrl) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      final QuerySnapshot result = await Firestore.instance.collection('users').where('FCMToken', isEqualTo: prefs.get('FCMToken')).getDocuments();
-      final List<DocumentSnapshot> documents = result.documents;
+      final QuerySnapshot result = await FirebaseFirestore.instance.collection('users').where('FCMToken', isEqualTo: prefs.get('FCMToken')).get();
+      final List<DocumentSnapshot> documents = result.docs;
       String myID = userId;
       if (documents.length == 0) {
-        await Firestore.instance.collection('users').document(userId).setData({
+        await FirebaseFirestore.instance.collection('users').doc(userId).set({
           'userId':userId,
           'name':userName,
           'intro':userIntro,
@@ -63,7 +96,7 @@ class FirebaseController {
         myID = userID;
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('userId',myID);
-        await Firestore.instance.collection('users').document(userID).updateData({
+        await FirebaseFirestore.instance.collection('users').doc(userID).update({
           'name':userName,
           'intro':userIntro,
           'userImageUrl':downloadUrl,
@@ -79,15 +112,19 @@ class FirebaseController {
   }
 
   Future<void> updateUserToken(userID, token) async {
-    await Firestore.instance.collection('users').document(userID).setData({
+    await FirebaseFirestore.instance.collection('users').doc(userID).update({
       'FCMToken':token,
     });
   }
 
   Future<List<DocumentSnapshot>> takeUserInformationFromFBDB() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final QuerySnapshot result = await Firestore.instance.collection('users').where('FCMToken', isEqualTo: prefs.get('FCMToken') ?? 'None').getDocuments();
-    return result.documents;
+    final QuerySnapshot result =
+    await FirebaseFirestore.instance.
+      collection('users').
+      where('FCMToken', isEqualTo: prefs.get('FCMToken') ?? 'None').
+      get();
+    return result.docs;
   }
 
   Future<int> getUnreadMSGCount([String peerUserID]) async{
@@ -99,17 +136,17 @@ class FirebaseController {
       peerUserID == null ? targetID = (prefs.get('userId') ?? 'NoId') : targetID = peerUserID;
 //      if (targetID != 'NoId') {
         final QuerySnapshot chatListResult =
-        await Firestore.instance.collection('users').document(targetID).collection('chatlist').getDocuments();
-        final List<DocumentSnapshot> chatListDocuments = chatListResult.documents;
+        await FirebaseFirestore.instance.collection('users').doc(targetID).collection('chatlist').get();
+        final List<DocumentSnapshot> chatListDocuments = chatListResult.docs;
         for(var data in chatListDocuments) {
-          final QuerySnapshot unReadMSGDocument = await Firestore.instance.collection('chatroom').
-          document(data['chatID']).
+          final QuerySnapshot unReadMSGDocument = await FirebaseFirestore.instance.collection('chatroom').
+          doc(data['chatID']).
           collection(data['chatID']).
           where('idTo', isEqualTo: targetID).
           where('isread', isEqualTo: false).
-          getDocuments();
+          get();
 
-          final List<DocumentSnapshot> unReadMSGDocuments = unReadMSGDocument.documents;
+          final List<DocumentSnapshot> unReadMSGDocuments = unReadMSGDocument.docs;
           unReadMSGCount = unReadMSGCount + unReadMSGDocuments.length;
         }
         print('unread MSG count is $unReadMSGCount');
@@ -127,23 +164,23 @@ class FirebaseController {
   }
 
   Future updateChatRequestField(String documentID,String lastMessage,chatID,myID,selectedUserID) async{
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection('users')
-        .document(documentID)
+        .doc(documentID)
         .collection('chatlist')
-        .document(chatID)
-        .setData({'chatID':chatID,
+        .doc(chatID)
+        .set({'chatID':chatID,
       'chatWith':documentID == myID ? selectedUserID : myID,
       'lastChat':lastMessage,
       'timestamp':DateTime.now().millisecondsSinceEpoch});
   }
 
   Future sendMessageToChatRoom(chatID,myID,selectedUserID,content,messageType) async {
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection('chatroom')
-        .document(chatID)
+        .doc(chatID)
         .collection(chatID)
-        .document(DateTime.now().millisecondsSinceEpoch.toString()).setData({
+        .doc(DateTime.now().millisecondsSinceEpoch.toString()).set({
       'idFrom': myID,
       'idTo': selectedUserID,
       'timestamp': DateTime.now().millisecondsSinceEpoch,

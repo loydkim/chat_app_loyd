@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chatapploydlab/Controllers/firebaseController.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
+// import 'package:flutter_widgets/flutter_widgets.dart';
 
 import 'Controllers/utils.dart';
 import 'chatroom.dart';
@@ -30,17 +30,20 @@ class _ChatListState extends State<ChatList> {
         title: Text('Chat App - Chat List'),
         centerTitle: true,
       ),
-      body: VisibilityDetector(
-        key: Key("1"),
-        onVisibilityChanged: ((visibility) {
-          print('ChatList Visibility code is '+'${visibility.visibleFraction}');
-          if (visibility.visibleFraction == 1.0) {
-            FirebaseController.instanace.getUnreadMSGCount();
-          }
-        }),
-        child: StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance.collection('users').orderBy('createdAt', descending: true).snapshots(),
-            builder: (context, snapshot) {
+      body:
+      // VisibilityDetector(
+      //   key: Key("1"),
+      //   onVisibilityChanged: ((visibility) {
+      //     print('ChatList Visibility code is '+'${visibility.visibleFraction}');
+      //     if (visibility.visibleFraction == 1.0) {
+      //       FirebaseController.instanace.getUnreadMSGCount();
+      //     }
+      //   }),
+      //   child:
+        StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.
+            collection('users').orderBy('createdAt', descending: true).snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (!snapshot.hasData)
                 return Container(
                   child: Center(
@@ -50,14 +53,14 @@ class _ChatListState extends State<ChatList> {
                 );
               return countChatListUsers(widget.myID, snapshot) > 0
               ? ListView(
-                  children: snapshot.data.documents.map((data) {
+                  children: snapshot.data.docs.map((data) {
                   if (data['userId'] == widget.myID) {
                     return Container();
                   } else {
                     return StreamBuilder<QuerySnapshot>(
-                      stream: Firestore.instance
+                      stream: FirebaseFirestore.instance
                           .collection('users')
-                          .document(widget.myID)
+                          .doc(widget.myID)
                           .collection('chatlist')
                           .where('chatWith', isEqualTo: data['userId'])
                           .snapshots(),
@@ -77,17 +80,17 @@ class _ChatListState extends State<ChatList> {
                                     ),
                                   ),
                                   title: Text(data['name']),
-                                  subtitle: Text((chatListSnapshot.hasData && chatListSnapshot.data.documents.length >0)
-                                      ? chatListSnapshot.data.documents[0]['lastChat']
+                                  subtitle: Text((chatListSnapshot.hasData && chatListSnapshot.data.docs.length >0)
+                                      ? chatListSnapshot.data.docs[0]['lastChat']
                                       : data['intro']),
                                   trailing: Padding(
                                       padding: const EdgeInsets.fromLTRB(0, 8, 4, 4),
-                                      child: (chatListSnapshot.hasData && chatListSnapshot.data.documents.length > 0)
+                                      child: (chatListSnapshot.hasData && chatListSnapshot.data.docs.length > 0)
                                           ? StreamBuilder<QuerySnapshot>(
-                                              stream: Firestore.instance
+                                              stream: FirebaseFirestore.instance
                                                   .collection('chatroom')
-                                                  .document(chatListSnapshot.data.documents[0]['chatID'])
-                                                  .collection(chatListSnapshot.data.documents[0]['chatID'])
+                                                  .doc(chatListSnapshot.data.docs[0]['chatID'])
+                                                  .collection(chatListSnapshot.data.docs[0]['chatID'])
                                                   .where('idTo',isEqualTo: widget.myID)
                                                   .where('isread', isEqualTo: false)
                                                   .snapshots(),
@@ -97,8 +100,8 @@ class _ChatListState extends State<ChatList> {
                                                   height: 50,
                                                   child: Column(
                                                     children: <Widget>[
-                                                      Text((chatListSnapshot.hasData && chatListSnapshot.data.documents.length >0)
-                                                            ? readTimestamp(chatListSnapshot.data.documents[0]['timestamp'])
+                                                      Text((chatListSnapshot.hasData && chatListSnapshot.data.docs.length >0)
+                                                            ? readTimestamp(chatListSnapshot.data.docs[0]['timestamp'])
                                                             : '',style: TextStyle(fontSize: 12),
                                                       ),
                                                       Padding(
@@ -106,12 +109,12 @@ class _ChatListState extends State<ChatList> {
                                                           child: CircleAvatar(
                                                           radius: 9,
                                                           child: Text(
-                                                            (chatListSnapshot.hasData && chatListSnapshot.data.documents.length > 0)
-                                                                ? ((notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.documents.length >0)
-                                                                    ? '${notReadMSGSnapshot.data.documents.length}' : ''): '',
+                                                            (chatListSnapshot.hasData && chatListSnapshot.data.docs.length > 0)
+                                                                ? ((notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.docs.length >0)
+                                                                    ? '${notReadMSGSnapshot.data.docs.length}' : ''): '',
                                                             style: TextStyle(fontSize: 10),),
-                                                          backgroundColor: (notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.documents.length >0 &&
-                                                                  notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.documents.length >0)
+                                                          backgroundColor: (notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.docs.length >0 &&
+                                                                  notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.docs.length >0)
                                                               ? Colors.red[400] : Colors.transparent,foregroundColor:Colors.white,
                                                         )),
                                                     ],
@@ -144,7 +147,8 @@ class _ChatListState extends State<ChatList> {
                   )),
                 );
             }),
-      ));
+      );
+    // );
   }
 
   Future<void> _moveTochatRoom(selectedUserToken, selectedUserID,selectedUserName, selectedUserThumbnail) async {

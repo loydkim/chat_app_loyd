@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:chatapploydlab/Model/const.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -49,9 +51,9 @@ String makeChatId(myID,selectedUserID) {
   return chatID;
 }
 
-int countChatListUsers(myID,snapshot) {
-  int resultInt = snapshot.data.documents.length;
-  for (var data in snapshot.data.documents) {
+int countChatListUsers(myID,AsyncSnapshot<QuerySnapshot> snapshot) {
+  int resultInt = snapshot.data.docs.length;
+  for (var data in snapshot.data.docs) {
     if (data['userId'] == myID) {
       resultInt--;
     }
