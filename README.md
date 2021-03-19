@@ -6,21 +6,9 @@
 | ------------- | ------------- |
 | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560">  | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/android_promotion.gif" width="340" height="560">  |
 
-
 ** Please click the Image to know how it works **
 
 [![Youtube](https://img.youtube.com/vi/OnIRKAbOcq4/0.jpg)](https://youtu.be/OnIRKAbOcq4)
-
-
-** If you download this code then have this error,
-
-[!] Gradle does not have execution permission. You should change the ownership of the project directory to your user, or move the project to a directory with execute permissions. Gradle task assembleDebug failed with exit code 1 Exited (sigterm)
-
-Do 
-
-chmod a+rx android/gradlew
-
-command in terminal.
 
 ** To use it, you have to change your permission in the Database and Storage of the firebase. Because the project didn't consider authentication.
 
