@@ -7,7 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// For Chatlist Functions
+import '../chatroom.dart';
+
+// For Chat List Functions
 
 String readTimestamp(int timestamp) {
   var now = DateTime.now();
@@ -71,14 +73,50 @@ String returnTimeStamp(int messageTimeStamp) {
   return resultString;
 }
 
-void setCurrentChatRoomID(value) async { // To know where I am in chat room. Avoid local notification.
+void setCurrentChatRoomID(value) async {
+  // To know where I am in chat room. Avoid local notification.
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.setString('currentChatRoom', value);
 }
 
-// For main view Functions
+List<dynamic> addInstructionInSnapshot(List<QueryDocumentSnapshot> snapshot){
+  List<dynamic> _returnList;
+  List<dynamic> _newData = addChatDateInSnapshot(snapshot);
+  _returnList = List<dynamic>.from(_newData.reversed);
+  _returnList.add(chatInstruction);
+  return _returnList;
+}
 
-launchURL() async {
+List<dynamic> addChatDateInSnapshot(List<QueryDocumentSnapshot> snapshot){
+  List<dynamic> _returnList = [];
+  String _currentDate;
+
+  for(QueryDocumentSnapshot snapshot in snapshot){
+    var format = DateFormat('EEEE, MMMM d, yyyy');
+    var date = DateTime.fromMillisecondsSinceEpoch(snapshot['timestamp']);
+
+    if(_currentDate == null){
+      _currentDate = format.format(date);
+      _returnList.add(_currentDate);
+    }
+
+    if(_currentDate == format.format(date)){
+      _returnList.add(snapshot);
+    }else{
+      _currentDate = format.format(date);
+      _returnList.add(_currentDate);
+      _returnList.add(snapshot);
+    }
+  }
+
+  return _returnList;
+}
+
+
+
+
+
+Future<void> launchURL() async {
   const url = youtubeChannelLink;
   if (await canLaunch(url)) {
     await launch(url);

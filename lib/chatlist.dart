@@ -1,28 +1,23 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chatapploydlab/Controllers/firebaseController.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_widgets/flutter_widgets.dart';
 
+import 'Controllers/image_controller.dart';
 import 'Controllers/utils.dart';
 import 'chatroom.dart';
+import 'subWidgets/common_widgets.dart';
 
 class ChatList extends StatefulWidget {
-  ChatList(this.myID, this.myName);
+  ChatList(this.myID, this.myName,this.myImageUrl);
 
   String myID;
   String myName;
+  String myImageUrl;
 
-  @override
-  _ChatListState createState() => _ChatListState();
+  @override _ChatList createState() => _ChatList();
 }
 
-class _ChatListState extends State<ChatList> {
-  @override
-  void initState() {
-    FirebaseController.instanace.getUnreadMSGCount();
-    super.initState();
-  }
+class _ChatList extends State<ChatList> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,123 +25,97 @@ class _ChatListState extends State<ChatList> {
         title: Text('Chat App - Chat List'),
         centerTitle: true,
       ),
-      body:
-      // VisibilityDetector(
-      //   key: Key("1"),
-      //   onVisibilityChanged: ((visibility) {
-      //     print('ChatList Visibility code is '+'${visibility.visibleFraction}');
-      //     if (visibility.visibleFraction == 1.0) {
-      //       FirebaseController.instanace.getUnreadMSGCount();
-      //     }
-      //   }),
-      //   child:
-        StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.
-            collection('users').orderBy('createdAt', descending: true).snapshots(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (!snapshot.hasData)
-                return Container(
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  color: Colors.white.withOpacity(0.7),
-                );
-              return countChatListUsers(widget.myID, snapshot) > 0
-              ? ListView(
-                  children: snapshot.data.docs.map((data) {
-                  if (data['userId'] == widget.myID) {
-                    return Container();
-                  } else {
-                    return StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(widget.myID)
-                          .collection('chatlist')
-                          .where('chatWith', isEqualTo: data['userId'])
-                          .snapshots(),
-                      builder: (context, chatListSnapshot) {
-                        return ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: CachedNetworkImage(
-                              imageUrl: data['userImageUrl'],
-                              placeholder: (context, url) => Container(
-                                transform:
-                                    Matrix4.translationValues(0, 0, 0),
-                                    child: Container(width: 60,height: 80,
-                                      child: Center(child:new CircularProgressIndicator())),),
-                                      errorWidget: (context, url, error) => new Icon(Icons.error),
-                                      width: 60,height: 80,fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  title: Text(data['name']),
-                                  subtitle: Text((chatListSnapshot.hasData && chatListSnapshot.data.docs.length >0)
-                                      ? chatListSnapshot.data.docs[0]['lastChat']
-                                      : data['intro']),
-                                  trailing: Padding(
-                                      padding: const EdgeInsets.fromLTRB(0, 8, 4, 4),
-                                      child: (chatListSnapshot.hasData && chatListSnapshot.data.docs.length > 0)
-                                          ? StreamBuilder<QuerySnapshot>(
-                                              stream: FirebaseFirestore.instance
-                                                  .collection('chatroom')
-                                                  .doc(chatListSnapshot.data.docs[0]['chatID'])
-                                                  .collection(chatListSnapshot.data.docs[0]['chatID'])
-                                                  .where('idTo',isEqualTo: widget.myID)
-                                                  .where('isread', isEqualTo: false)
-                                                  .snapshots(),
-                                              builder: (context,notReadMSGSnapshot) {
-                                                return Container(
-                                                  width: 60,
-                                                  height: 50,
-                                                  child: Column(
-                                                    children: <Widget>[
-                                                      Text((chatListSnapshot.hasData && chatListSnapshot.data.docs.length >0)
-                                                            ? readTimestamp(chatListSnapshot.data.docs[0]['timestamp'])
-                                                            : '',style: TextStyle(fontSize: 12),
-                                                      ),
-                                                      Padding(
-                                                          padding:const EdgeInsets.fromLTRB( 0, 5, 0, 0),
-                                                          child: CircleAvatar(
-                                                          radius: 9,
-                                                          child: Text(
-                                                            (chatListSnapshot.hasData && chatListSnapshot.data.docs.length > 0)
-                                                                ? ((notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.docs.length >0)
-                                                                    ? '${notReadMSGSnapshot.data.docs.length}' : ''): '',
-                                                            style: TextStyle(fontSize: 10),),
-                                                          backgroundColor: (notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.docs.length >0 &&
-                                                                  notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.docs.length >0)
-                                                              ? Colors.red[400] : Colors.transparent,foregroundColor:Colors.white,
-                                                        )),
-                                                    ],
-                                                  ),
-                                                );
-                                              })
-                                          : Text('')),
-                                          onTap: () {
-                                            _moveTochatRoom(data['FCMToken'],data['userId'],data['name'],data['userImageUrl']);
-                                          },
-                          );
-                        });
-                  }
-                }).toList())
-              : Container(
-                  child: Center(
-                      child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(Icons.forum, color: Colors.grey[700],size: 64,),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(
-                          'There are no users except you.\nPlease use other devices to chat.',
-                          style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-                          textAlign: TextAlign.center,
-                        ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('users').orderBy('createdAt', descending: true).snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
+          if (!userSnapshot.hasData) return loadingCircleForFB();
+          return countChatListUsers(widget.myID, userSnapshot) > 0
+          ? ListView(
+              children: userSnapshot.data.docs.map((userData) {
+              if (userData['userId'] == widget.myID) {
+                return Container();
+              } else {
+                return StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(widget.myID)
+                      .collection('chatlist')
+                      .where('chatWith', isEqualTo: userData['userId'])
+                      .snapshots(),
+                  builder: (context, chatListSnapshot) {
+                    return ListTile(
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: ImageController.instance.cachedImage(userData['userImageUrl']),
                       ),
-                    ],
-                  )),
-                );
-            }),
+                      title: Text(userData['name']),
+                      subtitle: Text((chatListSnapshot.hasData && chatListSnapshot.data.docs.length >0)
+                          ? chatListSnapshot.data.docs[0]['lastChat']
+                          : userData['intro']),
+                      trailing: Padding(padding: const EdgeInsets.fromLTRB(0, 8, 4, 4),
+                          child: (chatListSnapshot.hasData && chatListSnapshot.data.docs.length > 0)
+                          ? StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                .collection('chatroom')
+                                .doc(chatListSnapshot.data.docs[0]['chatID'])
+                                .collection(chatListSnapshot.data.docs[0]['chatID'])
+                                .where('idTo',isEqualTo: widget.myID)
+                                .where('isread', isEqualTo: false)
+                                .snapshots(),
+                              builder: (context,notReadMSGSnapshot) {
+                                return Container(
+                                  width: 60,
+                                  height: 50,
+                                  child: Column(
+                                    children: <Widget>[
+                                      Text((chatListSnapshot.hasData && chatListSnapshot.data.docs.length >0)
+                                            ? readTimestamp(chatListSnapshot.data.docs[0]['timestamp'])
+                                            : '',style: TextStyle(fontSize: 12),
+                                      ),
+                                      Padding(
+                                          padding:const EdgeInsets.fromLTRB( 0, 5, 0, 0),
+                                          child: CircleAvatar(
+                                          radius: 9,
+                                          child: Text(
+                                            (chatListSnapshot.hasData && chatListSnapshot.data.docs.length > 0)
+                                                ? ((notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.docs.length >0)
+                                                    ? '${notReadMSGSnapshot.data.docs.length}' : ''): '',
+                                          style: TextStyle(fontSize: 10),),
+                                          backgroundColor: (notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.docs.length >0 &&
+                                                  notReadMSGSnapshot.hasData && notReadMSGSnapshot.data.docs.length >0)
+                                              ? Colors.red[400] : Colors.transparent,foregroundColor:Colors.white,
+                                        )
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              })
+                          : Text('')),
+                          onTap: () {
+                            _moveTochatRoom(userData['FCMToken'],userData['userId'],userData['name'],userData['userImageUrl']);
+                          },
+                  );
+                });
+              }
+            }).toList())
+          : Container(
+              child: Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.forum, color: Colors.grey[700],size: 64,),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text(
+                      'There are no users except you.\nPlease use other devices to chat.',
+                      style: TextStyle(fontSize: 18, color: Colors.grey[700]),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              )),
+            );
+        }),
       );
     // );
   }
@@ -155,16 +124,17 @@ class _ChatListState extends State<ChatList> {
     try {
       String chatID = makeChatId(widget.myID, selectedUserID);
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ChatRoom(
-                  widget.myID,
-                  widget.myName,
-                  selectedUserToken,
-                  selectedUserID,
-                  chatID,
-                  selectedUserName,
-                  selectedUserThumbnail)));
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatRoom(
+            widget.myID,
+            widget.myName,
+            widget.myImageUrl,
+            selectedUserToken,
+            selectedUserID,
+            chatID,
+            selectedUserName,
+            selectedUserThumbnail)));
     } catch (e) {
       print(e.message);
     }
