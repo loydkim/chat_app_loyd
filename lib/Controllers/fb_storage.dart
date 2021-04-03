@@ -8,9 +8,11 @@ class FBStorage{
   static FBStorage get instanace => FBStorage();
 
   // Save Image to Storage
-  Future<String> saveUserImageToFirebaseStorage(userId,userName,userIntro,userImageFile) async {
+  Future<String> saveUserImageToFirebaseStorage(userEmail,userId,userName,userIntro,userImageFile) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      await prefs.setString('userEmail',userEmail);
       await prefs.setString('userId',userId);
       await prefs.setString('name',userName);
       await prefs.setString('intro',userIntro);
@@ -28,7 +30,7 @@ class FBStorage{
           .ref(filePath)
           .getDownloadURL();
       await prefs.setString('imageUrl',imageURL);
-      String result = await FBCloudStore.instanace.saveUserDataToFirebaseDatabase(userId,userName,userIntro,imageURL);
+      String result = await FBCloudStore.instanace.saveUserDataToFirebaseDatabase(userEmail,userId,userName,userIntro,imageURL);
 
       return result;
     }catch(e) {

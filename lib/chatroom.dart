@@ -12,12 +12,7 @@ import 'subWidgets/chatListTile/mine_list_tile.dart';
 import 'subWidgets/chatListTile/peer_user_list_tile.dart';
 import 'subWidgets/chatListTile/string_list_tile.dart';
 import 'subWidgets/common_widgets.dart';
-
-const chatInstruction = """Chat App is committed to maintaining a healthy chat, and blocks users who disseminated vegan chats or photos.
-
-We do not provide any other services other than this application. Beware of scam or illegal website promotion.
-
-Attempts to send obscene, offensive, racist messages or request money transactions can result in permanent suspension and criminal prosecution.""";
+import 'subWidgets/local_notification_view.dart';
 
 class ChatRoom extends StatefulWidget {
   ChatRoom(this.myID,this.myName,this.myImageUrl,this.selectedUserToken, this.selectedUserID, this.chatID, this.selectedUserName, this.selectedUserThumbnail);
@@ -31,44 +26,69 @@ class ChatRoom extends StatefulWidget {
   String selectedUserName;
   String selectedUserThumbnail;
 
-  @override
-  _ChatRoomState createState() => _ChatRoomState();
+  @override _ChatRoomState createState() => _ChatRoomState();
 }
 
-class _ChatRoomState extends State<ChatRoom> {
+class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver,LocalNotificationView {
   final TextEditingController _msgTextController = new TextEditingController();
   final ScrollController _chatListController = ScrollController();
   String messageType = 'text';
-  bool _isLoading = false;
   int chatListLength = 20;
-  double _scrollPosition = 560;
 
-  void _scrollListener() {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('didChangeAppLifecycleState');
     setState(() {
-      if (_scrollPosition < _chatListController.position.pixels ){
-        _scrollPosition = _scrollPosition + 560;
-        chatListLength = chatListLength + 20;
+      switch(state) {
+        case AppLifecycleState.resumed:
+          FBCloudStore.instanace.updateMyChatListValues(widget.myID,widget.chatID,true);
+          print('AppLifecycleState.resumed');
+          break;
+        case AppLifecycleState.inactive:
+          print('AppLifecycleState.inactive');
+          FBCloudStore.instanace.updateMyChatListValues(widget.myID,widget.chatID,false);
+          break;
+        case AppLifecycleState.paused:
+          print('AppLifecycleState.paused');
+          FBCloudStore.instanace.updateMyChatListValues(widget.myID,widget.chatID,false);
+          break;
       }
-      print('list view position is $_scrollPosition');
     });
   }
 
   @override
   void initState() {
-    setCurrentChatRoomID(widget.chatID);
-    // FBCloudStore.instanace.getUnreadMSGCount();
-    _chatListController.addListener(_scrollListener);
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    FBCloudStore.instanace.updateMyChatListValues(widget.myID,widget.chatID,true);
+    if(mounted){
+      isShowLocalNotification = true;
+      checkLocalNotification(localNotificationAnimation,widget.chatID);
+    }
+  }
+
+  void localNotificationAnimation(List<dynamic> data){
+    if(mounted){
+      setState(() {
+        if(data[1] == 1.0){
+          localNotificationData = data[0];
+        }
+        localNotificationAnimationOpacity = data[1] as double;
+      });
+    }
   }
 
   @override
   void dispose() {
-    setCurrentChatRoomID('none');
+    isShowLocalNotification = false;
+    FBCloudStore.instanace.updateMyChatListValues(widget.myID,widget.chatID,false);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Container(
       color: Colors.white,
       child: SafeArea(
@@ -84,21 +104,9 @@ class _ChatRoomState extends State<ChatRoom> {
                   doc(widget.chatID).
                   collection(widget.chatID).
                   orderBy('timestamp',descending: false).
-                  limit(chatListLength).
                   snapshots(),
               builder: (context,snapshot) {
                 if (!snapshot.hasData) return LinearProgressIndicator();
-                if (snapshot.hasData) {
-                for (var data in snapshot.data.docs) {
-                  if(data['idTo'] == widget.myID && data['isread'] == false) {
-                      if (data.reference != null) {
-                        FirebaseFirestore.instance.runTransaction((Transaction myTransaction) async {
-                          await myTransaction.update(data.reference, {'isread': true});
-                        });
-                      }
-                    }
-                  }
-                }
                 return Stack(
                   children: <Widget>[
                     Column(
@@ -109,14 +117,13 @@ class _ChatRoomState extends State<ChatRoom> {
                             shrinkWrap: true,
                             padding: const EdgeInsets.fromLTRB(4.0,10,4,10),
                             controller: _chatListController,
-                            children: addInstructionInSnapshot(snapshot.data.docs).map((data) { //snapshot.data.documents.reversed.map((data) {
-                              return _returnChatWidget(data);
-                            }).toList()
+                            children: addInstructionInSnapshot(snapshot.data.docs).map(_returnChatWidget).toList()
                           ),
                         ),
                         _buildTextComposer(),
                       ],
                     ),
+                    localNotificationCard(size)
                   ],
                 );
               }
@@ -129,7 +136,16 @@ class _ChatRoomState extends State<ChatRoom> {
 
   Widget _returnChatWidget(dynamic data){
     Widget _returnWidget;
+
     if(data is QueryDocumentSnapshot){
+      if(data['idTo'] == widget.myID && data['isread'] == false) {
+        if (data.reference != null) {
+          FirebaseFirestore.instance.runTransaction((Transaction myTransaction) async {
+            await myTransaction.update(data.reference, {'isread': true});
+          });
+        }
+      }
+
       _returnWidget = data['idFrom'] == widget.selectedUserID ? peerUserListTile(context,
           widget.selectedUserName,
           widget.selectedUserThumbnail,
@@ -161,7 +177,7 @@ class _ChatRoomState extends State<ChatRoom> {
                   onPressed: () {
                     ImageController.instance.cropImageFromFile().then((croppedFile) {
                       if (croppedFile != null) {
-                        setState(() { messageType = 'image'; _isLoading = true; });
+                        setState(() { messageType = 'image'; });
                         _saveUserImageToFirebaseStorage(croppedFile);
                       }else {
                         showAlertDialog(context,'Pick Image error');
@@ -204,10 +220,9 @@ class _ChatRoomState extends State<ChatRoom> {
 
   Future<void> _handleSubmitted(String text) async {
     try {
-      setState(() { _isLoading = true; });
       await FBCloudStore.instanace.sendMessageToChatRoom(widget.chatID,widget.myID,widget.selectedUserID,text,messageType);
-      await FBCloudStore.instanace.updateChatRequestField(widget.selectedUserID, messageType == 'text' ? text : '(Photo)',widget.chatID,widget.myID,widget.selectedUserID);
-      await FBCloudStore.instanace.updateChatRequestField(widget.myID, messageType == 'text' ? text : '(Photo)',widget.chatID,widget.myID,widget.selectedUserID);
+      await FBCloudStore.instanace.updateUserChatListField(widget.selectedUserID, messageType == 'text' ? text : '(Photo)',widget.chatID,widget.myID,widget.selectedUserID);
+      await FBCloudStore.instanace.updateUserChatListField(widget.myID, messageType == 'text' ? text : '(Photo)',widget.chatID,widget.myID,widget.selectedUserID);
       _getUnreadMSGCountThenSendMessage();
     }catch(e){
       showAlertDialog(context,'Error user information to database');
@@ -228,6 +243,5 @@ class _ChatRoomState extends State<ChatRoom> {
   void _resetTextFieldAndLoading() {
     FocusScope.of(context).requestFocus(FocusNode());
     _msgTextController.text = '';
-    setState(() { _isLoading = false; });
   }
 }
