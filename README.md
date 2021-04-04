@@ -1,4 +1,6 @@
-<a href="https://www.buymeacoffee.com/loydkim" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 14px !important;width: 40px !important;" ></a>
+If my code is helpful to you, I really appreceiate if you buy me a coffee 🙇🏻‍♂️☕️
+
+[![](https://1.bp.blogspot.com/-dvUCBQdmi0s/YFfLITMCaiI/AAAAAAAABZE/Ej-_5PgqW14KKLYWVJg1SzlRup4Rvf_fQCLcBGAsYHQ/s0/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67.png)](https://www.buymeacoffee.com/loydkim)
 
 # Chatapploydlab
 
