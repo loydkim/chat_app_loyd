@@ -60,10 +60,12 @@ Attempts to send obscene, offensive, racist messages or request money transactio
 
 * Main features *
 
-- Realtime chatting ( Don't need a refresh)
+- Realtime chatting with chat date ( Don't need a refresh )
 - Push Notification with Image( Background, Foreground )
+- Check is Read Message
+- Custom Local Notification design
 - Badge count ( Show unread message count)
-- Send an image ( Crop image and it can expand the image)
+- Send an image and edit ( Crop image and it can expand the image)
 
  The chat function is used in many apps. Flutter allows you to create iPhone and Android apps simultaneously. The main functions are push notification (background, foreground), Badge count, send an image, chat realtime. If you have any problems with my code or have any ideas to update, please leave a comment.
 
