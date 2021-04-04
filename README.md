@@ -2,19 +2,15 @@ If my code is helpful to you, I really appreceiate if you buy me a coffee ðŸ™‡ðŸ
 
 [![](https://1.bp.blogspot.com/-dvUCBQdmi0s/YFfLITMCaiI/AAAAAAAABZE/Ej-_5PgqW14KKLYWVJg1SzlRup4Rvf_fQCLcBGAsYHQ/s0/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67.png)](https://www.buymeacoffee.com/loydkim)
 
-# Chatapploydlab
+# Chat app loyd lab
 
 | iOS Device  | Android Device |
 | ------------- | ------------- |
 | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/ios_promotion.gif" width="300" height="560">  | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/android_promotion.gif" width="340" height="560">  |
 
-** Please click the Image to know how it works **
+** To use it, you have to change your permission in the Database and Storage of the firebase.
 
-[![Youtube](https://img.youtube.com/vi/OnIRKAbOcq4/0.jpg)](https://youtu.be/OnIRKAbOcq4)
-
-** To use it, you have to change your permission in the Database and Storage of the firebase. Because the project didn't consider authentication.
-
-Go to Firebase Console - Database - Rule. Change it this ( )
+Go to Firebase Console - Database - Rule. Change it this
 
 ```python
 rules_version = '2';
@@ -45,6 +41,23 @@ service firebase.storage {
 
 ```
 
+And To use notification, Please copy your firebase project server String to Model/const.dart file
+
+Go to Firebase Console - Project settings - Cloud Messaging - Server key.
+
+```python
+const String firebaseCloudserverToken = 'YOUR_FB_SERVER_KEY';//AAAAFxtLywg:APA91bFbcXfhUI2b2MagqgYnL
+const String firebaseCloudvapidKey = 'YOUR_VAPID_KEY';
+const String youtubeChannelLink = 'https://www.youtube.com/channel/UCLNCErWFQ6LZoaV_JKOq_lQ';
+
+const chatInstruction = """Chat App is committed to maintaining a healthy chat, and blocks users who disseminated vegan chats or photos.
+We do not provide any other services other than this application. Beware of scam or illegal website promotion.
+Attempts to send obscene, offensive, racist messages or request money transactions can result in permanent suspension and criminal prosecution.""";
+
+
+```
+
+
 * Main features *
 
 - Realtime chatting ( Don't need a refresh)
@@ -56,12 +69,11 @@ service firebase.storage {
 
 * Develop environment.
 
-- Flutter SDK Version: 1.12.13+hotfix.9
-- Flutter: 45.1.1
-- Dart: 192.7761
-- Xcode Version: 11.4.1
-- Android Studio: 3.6.2
-- OS Version: MacOS Catalina 10.15.4
+- Flutter SDK Version: 2.0.1
+- Dart: 2.12.0
+- Xcode Version: 12.4
+- Android Studio: 4.1
+- OS Version: MacOS Big Sur 11.2.3
 
 Thank you for watching :)
 
