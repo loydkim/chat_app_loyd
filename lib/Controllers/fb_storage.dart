@@ -8,7 +8,7 @@ class FBStorage{
   static FBStorage get instanace => FBStorage();
 
   // Save Image to Storage
-  Future<String> saveUserImageToFirebaseStorage(userEmail,userId,userName,userIntro,userImageFile) async {
+  Future<List<String>> saveUserImageToFirebaseStorage(userEmail,userId,userName,userIntro,userImageFile) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -30,7 +30,7 @@ class FBStorage{
           .ref(filePath)
           .getDownloadURL();
       await prefs.setString('imageUrl',imageURL);
-      String result = await FBCloudStore.instanace.saveUserDataToFirebaseDatabase(userEmail,userId,userName,userIntro,imageURL);
+      List<String> result = await FBCloudStore.instanace.saveUserDataToFirebaseDatabase(userEmail,userId,userName,userIntro,imageURL);
 
       return result;
     }catch(e) {

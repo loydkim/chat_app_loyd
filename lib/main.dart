@@ -227,20 +227,20 @@ class _MyHomePageState extends State<MyHomePage> with FBAuth{
     if(_userImageFile.path != ''){
       FBStorage.instanace.saveUserImageToFirebaseStorage(_emailTextController.text,
           _userId,_nameTextController.text,_introTextController.text,
-          _userImageFile).then((userId){
-        _moveToChatList(userId);
+          _userImageFile).then((userData){
+        _moveToChatList(userData);
       });
     }else{
-      FBCloudStore.instanace.saveUserDataToFirebaseDatabase(_emailTextController.text,_userId,_nameTextController.text,_introTextController.text,_userImageUrlFromFB).then((userId){
-        _moveToChatList(userId);
+      FBCloudStore.instanace.saveUserDataToFirebaseDatabase(_emailTextController.text,_userId,_nameTextController.text,_introTextController.text,_userImageUrlFromFB).then((userData){
+        _moveToChatList(userData);
       });
     }
   }
 
-  void _moveToChatList(userId) {
+  void _moveToChatList(List<String> userData) {
     setState(() => _isLoading = false);
-    if(userId != null) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ChatList(userId, _nameTextController.text,_userImageUrlFromFB)));
+    if(userData != null) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ChatList(userData[0], _nameTextController.text,_userImageUrlFromFB == '' ? userData[1] : _userImageUrlFromFB)));
     }
     else { showAlertDialog(context,'Save user data error'); }
   }

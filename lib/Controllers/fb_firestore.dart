@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class FBCloudStore {
   static FBCloudStore get instanace => FBCloudStore();
   // About Firebase Database
-  Future<String> saveUserDataToFirebaseDatabase(userEmail,userId,userName,userIntro,downloadUrl) async {
+  Future<List<String>> saveUserDataToFirebaseDatabase(userEmail,userId,userName,userIntro,downloadUrl) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final QuerySnapshot result = await FirebaseFirestore.instance.collection('users').where('userId', isEqualTo: prefs.get('userId')).get();
@@ -35,7 +35,7 @@ class FBCloudStore {
           'FCMToken':prefs.get('FCMToken')?? 'NOToken',
         });
       }
-      return myID;
+      return [myID,downloadUrl];
     }catch(e) {
       print(e.message);
       return null;
