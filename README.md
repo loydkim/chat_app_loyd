@@ -33,15 +33,17 @@ And change the permission in Storage
 
 Go to Firebase Console - Storage - Rules.
 
+```python
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
-      allow read, write;
+      allow read, write: if request.auth != null;
     }
   }
 }
 
+```
 
 * Main features *
 
