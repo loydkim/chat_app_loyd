@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalNotificationData{
   final String userImage;
@@ -33,33 +34,35 @@ class LocalNotificationView{
       print('ChatList Got a message whilst in the foreground!');
       print('ChatList Message data: ${message.data}');
 
-      RemoteNotification notification = message.notification;
-      AndroidNotification android = message.notification?.android;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final inRoomChatId = prefs.getString("inRoomChatId") ?? "";
 
-      final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-      const AndroidNotificationChannel channel = AndroidNotificationChannel(
-        'high_importance_channel', // id
-        'High Importance Notifications', // title
-        'This channel is used for important notifications.', // description
-        importance: Importance.max,
-      );
-
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(channel);
-
-      if (message.data != null && chatID != message.data["chatroomid"]) {
-        LocalNotificationData localData = LocalNotificationData(
-          userImage : message.data["userImage"],
-          userName: message.data["userName"],
-          userMessage:message.data["message"],
-        );
-        this.changeNotificationState([localData,1.0]);
-        startTimeout();
+      if(inRoomChatId != message.data["chatroomid"]){
+        if (message.data != null){// && chatID != message.data["chatroomid"]) {
+          LocalNotificationData localData = LocalNotificationData(
+            userImage : message.data["userImage"],
+            userName: message.data["userName"],
+            userMessage:message.data["message"],
+          );
+          this.changeNotificationState([localData,1.0]);
+          startTimeout();
+        }
       }
 
+
+      // RemoteNotification notification = message.notification;
+      // AndroidNotification android = message.notification?.android;
+      // final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      // FlutterLocalNotificationsPlugin();
+      // const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      //   'high_importance_channel', // id
+      //   'High Importance Notifications', // title
+      //   'This channel is used for important notifications.', // description
+      //   importance: Importance.max,
+      // );
+      // await flutterLocalNotificationsPlugin
+      //     .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+      //     ?.createNotificationChannel(channel);
       // if (notification != null && android != null) {
       //   flutterLocalNotificationsPlugin.show(
       //       notification.hashCode,

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chatapploydlab/Controllers/fb_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Controllers/fb_firestore.dart';
 import 'Controllers/fb_storage.dart';
@@ -61,8 +62,10 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver,LocalNo
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     FBCloudStore.instanace.updateMyChatListValues(widget.myID,widget.chatID,true);
+
     if(mounted){
       isShowLocalNotification = true;
+      _savedChatId(widget.chatID);
       checkLocalNotification(localNotificationAnimation,widget.chatID);
     }
   }
@@ -78,10 +81,16 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver,LocalNo
     }
   }
 
+  Future<void> _savedChatId(String value) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("inRoomChatId", value);
+  }
+
   @override
   void dispose() {
     isShowLocalNotification = false;
     FBCloudStore.instanace.updateMyChatListValues(widget.myID,widget.chatID,false);
+    _savedChatId("");
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
