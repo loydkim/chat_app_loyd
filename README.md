@@ -16,6 +16,7 @@ If my code is helpful to you, I really appreceiate if you buy me a coffee ðŸ™‡ðŸ
 
 Go to Firebase Console - Database - Rule. Change it this ( )
 
+```python
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -24,6 +25,9 @@ service cloud.firestore {
     }
   }
 }
+```
+
+
 
 And change the permission in Storage
 
@@ -42,7 +46,7 @@ service firebase.storage {
 * Main features *
 
 - Realtime chatting ( Don't need a refresh)
-- Push Notification ( Background, Foreground)
+- Push Notification with Image( Background, Foreground )
 - Badge count ( Show unread message count)
 - Send an image ( Crop image and it can expand the image)
 
