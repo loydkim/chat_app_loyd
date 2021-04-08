@@ -6,7 +6,7 @@ If my code is helpful to you, I really appreceiate if you buy me a coffee ðŸ™‡ðŸ
 
 | iOS Device  | Android Device |
 | ------------- | ------------- |
-| ![](https://github.com/loydkim/chat_app_loyd/blob/master/Chat_App_iOS.gif)  | <img src="https://github.com/loydkim/chat_app_loyd/blob/master/Chat_App_Android.gif" width="300" height="560">  |
+| ![](https://github.com/loydkim/chat_app_loyd/blob/master/Chat_App_iOS.gif)  | ![](https://github.com/loydkim/chat_app_loyd/blob/master/Chat_App_Android.gif) |
 
 ** To use it, you have to change your permission in the Database and Storage of the firebase.
 
